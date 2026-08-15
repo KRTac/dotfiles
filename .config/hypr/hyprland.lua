@@ -1,0 +1,8 @@
+require("animations")
+require("appearance")
+require("idle")
+require("inputs")
+require("keybinds")
+require("misc")
+require("monitor")
+require("windows-workspaces")
