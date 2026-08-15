@@ -1,6 +1,6 @@
 require("animations")
 require("appearance")
-require("idle")
+require("autostart")
 require("inputs")
 require("keybinds")
 require("misc")
