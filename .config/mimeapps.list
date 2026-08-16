@@ -1,0 +1,14 @@
+[Default Applications]
+application/xhtml+xml=firefox.desktop
+text/html=firefox.desktop
+x-scheme-handler/http=firefox.desktop
+x-scheme-handler/https=firefox.desktop
+
+[Added Associations]
+application/xhtml+xml=firefox.desktop;
+text/html=firefox.desktop;
+x-scheme-handler/http=firefox.desktop;
+x-scheme-handler/https=firefox.desktop;
+
+[Removed Associations]
+
