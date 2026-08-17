@@ -46,6 +46,14 @@ local function setupMonitors(withNotif)
             hl.notification.create({ text = "External monitor detected", timeout = 10000 })
         end
     else
+        hl.monitor({
+            output = "eDP-1",
+            mode = "preferred",
+            position = "0x0",
+            scale = 1,
+            vrr = 0
+        })
+
         -- hl.dsp.moveworkspacetomonitor({
         --     workspace = 1,
         --     monitor = "eDP-1",
