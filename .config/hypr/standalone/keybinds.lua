@@ -1,4 +1,4 @@
-local config = require("config")
+local config = require("standalone.config")
 
 hl.bind(config.mainMod .. " + Q", hl.dsp.exec_cmd(config.terminal))
 local closeWindowBind = hl.bind(config.mainMod .. " + C", hl.dsp.window.close())

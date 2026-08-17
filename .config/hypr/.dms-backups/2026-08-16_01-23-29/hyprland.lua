@@ -1,8 +1,0 @@
-require("animations")
-require("appearance")
-require("autostart")
-require("inputs")
-require("keybinds")
-require("misc")
-require("monitor")
-require("windows-workspaces")

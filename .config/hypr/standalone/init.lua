@@ -1,0 +1,8 @@
+require("standalone.animations")
+require("standalone.appearance")
+require("standalone.autostart")
+require("standalone.inputs")
+require("standalone.keybinds")
+require("standalone.misc")
+require("standalone.monitor")
+require("standalone.windows-workspaces")
