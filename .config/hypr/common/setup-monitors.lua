@@ -17,6 +17,9 @@ local function scale(value, startAt, endAt)
     return math.floor(scale * 100 + 0.5) / 100
 end
 
+local externalMonitor = "HDMI-A-5"
+local laptopMonitor = "eDP-1"
+
 local function setupMonitors(withNotif)
     local monitors = hl.get_monitors()
 
@@ -26,18 +29,22 @@ local function setupMonitors(withNotif)
     local laptopH = 0
 
     for _, monitor in ipairs(monitors) do
-        if monitor.name == "HDMI-A-5" then
+        if monitor.name == externalMonitor then
             auxW = monitor.width
             auxH = monitor.height
-        elseif monitor.name == "eDP-1" then
+        elseif monitor.name == laptopMonitor then
             laptopW = monitor.width
             laptopH = monitor.height
+        end
+ 
+        if auxW > 0 and laptopW > 0 then
+            break
         end
     end
 
     if auxW > 0 then
         hl.monitor({
-            output = "eDP-1",
+            output = laptopMonitor,
             mode = "preferred",
             position = auxW .. "x" .. (auxH - laptopH),
             scale = 1,
@@ -45,7 +52,7 @@ local function setupMonitors(withNotif)
         })
 
         hl.monitor({
-            output = "HDMI-A-5",
+            output = externalMonitor,
             mode = "preferred",
             position = "0x0",
             scale = scale(auxW),
@@ -54,11 +61,11 @@ local function setupMonitors(withNotif)
 
         -- hl.dsp.moveworkspacetomonitor({
         --     workspace = 1,
-        --     monitor = "HDMI-A-5",
+        --     monitor = externalMonitor,
         -- })
 
         hl.dsp.focus({
-            monitor = "HDMI-A-5",
+            monitor = externalMonitor,
         })
 
         if withNotif then
@@ -66,7 +73,7 @@ local function setupMonitors(withNotif)
         end
     else
         hl.monitor({
-            output = "eDP-1",
+            output = laptopMonitor,
             mode = "preferred",
             position = "0x0",
             scale = 1,
@@ -75,11 +82,11 @@ local function setupMonitors(withNotif)
 
         -- hl.dsp.moveworkspacetomonitor({
         --     workspace = 1,
-        --     monitor = "eDP-1",
+        --     monitor = laptopMonitor,
         -- })
 
         hl.dsp.focus({
-            monitor = "eDP-1",
+            monitor = laptopMonitor,
         })
 
         if withNotif then
