@@ -12,7 +12,9 @@ local function scale(value, startAt, endAt)
         return scaleEnd
     end
 
-    return math.max(scaleStart, math.min(scaleEnd, 1 + (value - startAt) / (endAt - startAt)))
+    local scale = math.max(scaleStart, math.min(scaleEnd, 1 + (value - startAt) / (endAt - startAt)))
+
+    return math.floor(scale * 100 + 0.5) / 100
 end
 
 local function setupMonitors(withNotif)
