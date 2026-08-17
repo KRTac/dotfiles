@@ -17,14 +17,23 @@ local function scale(value, startAt, endAt)
     return math.floor(scale * 100 + 0.5) / 100
 end
 
+local function executable_exists(name)
+    local handle = io.popen("command -v " .. name .. " 2>/dev/null")
+    local result = handle:read("*l")
+    handle:close()
+    return result ~= nil
+end
+
 local externalMonitor = "HDMI-A-5"
 local laptopMonitor = "eDP-1"
+local notificationDurationMs = 10000
 
-local function setupMonitors(withNotif)
+local function setup_monitors(withNotif)
     local monitors = hl.get_monitors()
 
     local auxW = 0
     local auxH = 0
+    local auxFreq = 0
     local laptopW = 0
     local laptopH = 0
 
@@ -32,6 +41,7 @@ local function setupMonitors(withNotif)
         if monitor.name == externalMonitor then
             auxW = monitor.width
             auxH = monitor.height
+            auxFreq = monitor.refresh_rate
         elseif monitor.name == laptopMonitor then
             laptopW = monitor.width
             laptopH = monitor.height
@@ -42,6 +52,9 @@ local function setupMonitors(withNotif)
         end
     end
 
+    local notificationMain = ""
+    local notificationSub = ""
+
     if auxW > 0 then
         hl.monitor({
             output = laptopMonitor,
@@ -51,11 +64,13 @@ local function setupMonitors(withNotif)
             vrr = 0
         })
 
+        local auxScale = scale(auxW)
+
         hl.monitor({
             output = externalMonitor,
             mode = "preferred",
             position = "0x0",
-            scale = scale(auxW),
+            scale = auxScale,
             vrr = 0
         })
 
@@ -69,7 +84,14 @@ local function setupMonitors(withNotif)
         })
 
         if withNotif then
-            hl.notification.create({ text = "External monitor detected", timeout = 10000 })
+            notificationMain = "Display connected"
+            notificationSub = string.format(
+                "%dx%d@%.2fHz, %.2f scale",
+                auxW,
+                auxH,
+                auxFreq,
+                auxScale
+            )
         end
     else
         hl.monitor({
@@ -89,18 +111,27 @@ local function setupMonitors(withNotif)
             monitor = laptopMonitor,
         })
 
-        if withNotif then
-            hl.notification.create({ text = "External monitor disconnected", timeout = 10000 })
-        end
+        notificationMain = "Display disconnected"
+    end
+
+    if withNotif then
+        hl.exec_cmd(string.format(
+            "notify-send -t %d -e '%s' '%s'",
+            notificationDurationMs,
+            notificationMain,
+            notificationSub
+        ))
     end
 end
 
 local notifyAfter = os.time() + 5
+local has_notif = executable_exists("notify-send")
+
 local handleEvent = function()
-    setupMonitors(notifyAfter < os.time())
+    setup_monitors(has_notif and notifyAfter < os.time())
 end
 
 hl.on("monitor.added", handleEvent)
 hl.on("monitor.removed", handleEvent)
 
-setupMonitors(false)
+setup_monitors(false)
