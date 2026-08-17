@@ -1,3 +1,20 @@
+local function scale(value, startAt, endAt)
+    startAt = startAt or 2560
+    endAt = endAt or 3840
+    local scaleStart = 1
+    local scaleEnd = 2
+
+    if value <= startAt then
+        return scaleStart
+    end
+
+    if value >= endAt then
+        return scaleEnd
+    end
+
+    return math.max(scaleStart, math.min(scaleEnd, 1 + (value - startAt) / (endAt - startAt)))
+end
+
 local function setupMonitors(withNotif)
     local monitors = hl.get_monitors()
 
@@ -29,7 +46,7 @@ local function setupMonitors(withNotif)
             output = "HDMI-A-5",
             mode = "preferred",
             position = "0x0",
-            scale = auxW > 2560 and 1.5 or 1,
+            scale = scale(auxW),
             vrr = 0
         })
 
