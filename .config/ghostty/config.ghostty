@@ -1,5 +1,6 @@
 font-family = "SauceCodePro NFM"
 font-size = 15
+adjust-cell-height = 10%
 
 theme = dankcolors
 
