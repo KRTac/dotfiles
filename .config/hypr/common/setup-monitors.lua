@@ -104,11 +104,9 @@ local function setup_monitors(withNotif)
         hl.dsp.focus({
             monitor = laptopMonitor,
         })
-
-        notificationMain = "Display disconnected"
     end
 
-    if withNotif then
+    if withNotif and notificationMain then
         hl.exec_cmd(string.format(
             "notify-send -t %d -e '%s' '%s'",
             notificationDurationMs,
