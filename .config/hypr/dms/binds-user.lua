@@ -4,4 +4,4 @@ hl.unbind("SUPER + T")
 hl.bind("SUPER + T", hl.dsp.exec_cmd("ghostty"), { description = "Ghostty Terminal" })
 
 hl.unbind("SUPER + E")
-hl.bind("SUPER + E", hl.dsp.exec_cmd("thunar"), { description = "Thunar File Manager" })
+hl.bind("SUPER + E", hl.dsp.exec_cmd("nautilus"), { description = "Nautilus File Manager" })
