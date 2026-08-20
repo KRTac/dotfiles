@@ -15,12 +15,9 @@ init_repos() {
     init_repo "$PUBLIC_PATH" "$PUBLIC_REPO"
   fi
 
-  run_stow "$PUBLIC_PATH"
-
   if [[ -n "$PRIVATE_PATH" && -n "$PRIVATE_REPO" ]]; then
     info "Private repo..."
     init_repo "$PRIVATE_PATH" "$PRIVATE_REPO"
-    run_stow "$PRIVATE_PATH"
   fi
 
   if [[ -n "$NIXOS_PATH" && -n "$NIXOS_REPO" ]]; then

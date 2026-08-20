@@ -13,7 +13,6 @@ fi
 function="$1"
 shift
 
-CFG_PATH="$HOME/.config/nos/config"
 ARGS_REST=()
 
 while [[ $# -gt 0 ]]; do
@@ -39,16 +38,26 @@ if [[ "$function" == "sample-config" ]]; then
   exit 0
 fi
 
-if [[ ! -f "$CFG_PATH" ]]; then
+CFG_PATH="$HOME/.config/nos/config"
+CFG_OVERRIDE_PATH="$HOME/.config/nos/config.local"
+AUTO_UPDATE_STOW=
+
+if [[ -f "$CFG_PATH" ]]; then
+  info "Sourcing configuration from $(style "path" "$CFG_PATH")"
+  source "$CFG_PATH"
+  _CFG_LOADED=1
+fi
+
+if [[ -f "$CFG_OVERRIDE_PATH" ]]; then
+  info "Local config detected in $(style "path" "$CFG_OVERRIDE_PATH")"
+  source "$CFG_OVERRIDE_PATH"
+  _CFG_LOADED=1
+fi
+
+if [[ -z "$_CFG_LOADED" ]]; then
   missing_config
   exit 1
 fi
-
-AUTO_UPDATE_STOW=
-
-CFG_PATH="$(realpath "$CFG_PATH")"
-info "Sourcing configuration from $(style "path" "$CFG_PATH")"
-source "$CFG_PATH"
 
 if [[ -n "$STOW_TARGET" ]]; then
   STOW_TARGET="$(realpath "$STOW_TARGET")"
