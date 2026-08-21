@@ -35,6 +35,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     --dry-run)
       _STOW_DRY_RUN=1
+      shift
       ;;
     *)
       ARGS_REST+=("$1")
