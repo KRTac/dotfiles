@@ -87,14 +87,23 @@ latest_all() {
 }
 
 stow_all() {
+  stow_public
+  stow_private
+}
+
+stow_public() {
   public_path_check
 
   info "Stowing public..."
   run_stow "$PUBLIC_PATH"
+}
 
+stow_private() {
   if [[ -n "$PRIVATE_PATH" ]]; then
     info "Stowing private..."
     run_stow "$PRIVATE_PATH"
+  else
+    info "Private source not defined."
   fi
 }
 

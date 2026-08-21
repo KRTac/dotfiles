@@ -98,7 +98,24 @@ case "$function" in
     ;;
   stow)
     stow_or_die
-    stow_all
+
+    if [[ ${#ARGS_REST[@]} -eq 0 ]]; then
+      stow_all
+      exit
+    fi
+
+    case "${ARGS_REST[0]}" in
+      public)
+        stow_public
+        ;;
+      private)
+        stow_private
+        ;;
+      *)
+        error "Unknown repo $(style "action" "${ARGS_REST[0]}")."
+        exit 1
+        ;;
+    esac
     ;;
   auto-update)
     latest_all
@@ -118,20 +135,26 @@ case "$function" in
       exit 1
     fi
 
-    if [[ "${ARGS_REST[0]}" == "start" ]]; then
-      info "Starting service timer..."
-      systemctl --user start nos-auto-update.timer
-    elif [[ "${ARGS_REST[0]}" == "stop" ]]; then
-      info "Stopping service timer..."
-      systemctl --user stop nos-auto-update.timer
-    elif [[ "${ARGS_REST[0]}" == "status" ]]; then
-      systemctl --user status nos-auto-update.service
-    elif [[ "${ARGS_REST[0]}" == "log" ]]; then
-      journalctl --user -f -u nos-auto-update.service
-    else
-      error "Unknown service action $(style "action" "${ARGS_REST[0]}")."
-      exit 1
-    fi
+    case "${ARGS_REST[0]}" in
+      start)
+        info "Starting service timer..."
+        systemctl --user start nos-auto-update.timer
+        ;;
+      stop)
+        info "Stopping service timer..."
+        systemctl --user stop nos-auto-update.timer
+        ;;
+      status)
+        systemctl --user status nos-auto-update.service
+        ;;
+      log)
+        journalctl --user -f -u nos-auto-update.service
+        ;;
+      *)
+        error "Unknown service action $(style "action" "${ARGS_REST[0]}")."
+        exit 1
+        ;;
+    esac
     ;;
   help)
     usage
