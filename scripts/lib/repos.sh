@@ -121,12 +121,12 @@ run_stow() {
   fi
 
   if [[ -n "$STOW_DRY_RUN" ]]; then
-    info i "Source: $(style "path" "$1")"
+    info "Source: $(style "path" "$1")"
     info i "Target: $(style "path" "$STOW_TARGET")"
     info i "Dry run only, no changes applied."
     stow -d "$1" -t "$STOW_TARGET" --no-folding -n -v .
   else
-    info i "Source: $(style "path" "$1")"
+    info "Source: $(style "path" "$1")"
     info i "Target: $(style "path" "$STOW_TARGET")"
     stow -d "$1" -t "$STOW_TARGET" --no-folding .
   fi
