@@ -100,6 +100,7 @@ usage() {
  [$(style 'yellow' '-optionA')]\
  [$(style 'magenta' '-optionB ')\
  $(style 'path' '~/file')]\n"
+  echo "WIP"
 }
 
 missing_config() {

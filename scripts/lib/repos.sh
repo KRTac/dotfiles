@@ -6,6 +6,8 @@ public_path_check() {
 }
 
 init_repos() {
+  network_or_die
+
   info "Initiating or updating repos"
 
   public_path_check
@@ -62,6 +64,8 @@ init_repo() {
 }
 
 latest_all() {
+  network_or_die
+
   info "Updating repos"
 
   public_path_check

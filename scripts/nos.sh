@@ -8,7 +8,7 @@ if [[ -d "$_NIXOS_BIN" ]]; then
 fi
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/lib/output.sh"
+source "$SCRIPT_DIR/lib/util.sh"
 source "$SCRIPT_DIR/lib/repos.sh"
 
 if [[ $# -lt 1 ]]; then
