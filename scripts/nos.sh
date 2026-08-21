@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 
 
-_NIXOS_BIN="/run/current-system/sw/bin"
-
-if [[ -d "$_NIXOS_BIN" ]]; then
-  PATH="$_NIXOS_BIN:$PATH"
-fi
-
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/util.sh"
 source "$SCRIPT_DIR/lib/repos.sh"
@@ -118,6 +112,15 @@ case "$function" in
     esac
     ;;
   auto-update)
+    # If it's run from a service on NixOS, systemd restricts the enviroment.
+    # Padding the PATH to see git and stow.
+
+    _NIXOS_BIN="/run/current-system/sw/bin"
+
+    if [[ -d "$_NIXOS_BIN" ]]; then
+      PATH="$_NIXOS_BIN:$PATH"
+    fi
+
     latest_all
 
     if [[ "$AUTO_UPDATE_STOW" != "1" ]]; then
