@@ -1,4 +1,4 @@
-public_path_check() {
+public_path_or_die() {
   if [[ -z "$PUBLIC_PATH" ]]; then
     error "Public dotfiles path not specified."
     exit 1
@@ -10,7 +10,7 @@ init_repos() {
 
   info "Initiating or updating repos"
 
-  public_path_check
+  public_path_or_die
 
   if [[ -n "$PUBLIC_REPO" ]]; then
     info "Public repo..."
@@ -68,7 +68,7 @@ latest_all() {
 
   info "Updating repos"
 
-  public_path_check
+  public_path_or_die
 
   if [[ -n "$PUBLIC_REPO" ]]; then
     info "Public repo..."
@@ -92,7 +92,7 @@ stow_all() {
 }
 
 stow_public() {
-  public_path_check
+  public_path_or_die
 
   info "Stowing public..."
   run_stow "$PUBLIC_PATH"
@@ -113,12 +113,12 @@ repo_to_latest() {
 
 run_stow() {
   if [[ -z "$STOW_TARGET" ]]; then
-    error "$(style "green,bold" "STOW_TARGET") not set, skipping stow..."
+    error "$(style "option" "STOW_TARGET") not set, skipping stow..."
     return
   fi
 
   if [[ -z "$_WITH_STOW" ]]; then
-    error "$(style "green,bold" "stow") command not found."
+    error "$(style "command" "stow") command not found."
     info i "Install GNU Stow to symlink the files to the STOW_TARGET directory."
     return
   fi
