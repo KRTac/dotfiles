@@ -1,25 +1,16 @@
 STOW_TARGET=~/
 
-# Simulated run without changes. Only shows what symlinks stow would create.
 #STOW_DRY_RUN=1
 
-# Whether to run stow during service updates.
 AUTO_UPDATE_STOW=1
 
-# Public dotfiles repo.
 PUBLIC_PATH=~/configs/dotfiles
 PUBLIC_REPO=git@github.com:KRTac/dotfiles.git
 
-### Optional ###
-
-# Repo with stuff you don't want out in public.
-# Even though it's private, DON'T put any ssh keys or plain text passwords in there.
 PRIVATE_PATH=~/configs/dotfiles-private
 PRIVATE_REPO=git@github.com:KRTac/dotfiles-private.git
 
-# NixOS config files repo.
 NIXOS_PATH=~/configs/nixos
 NIXOS_REPO=git@github.com:KRTac/nixos-conf.git
 
-# ~/.ssh/ key to be used for git. If you don't want to or can't use your regular key.
 REPO_SSH_KEY=id_ed25519.dotfiles
