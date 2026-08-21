@@ -83,14 +83,20 @@ case "$function" in
     latest_all
     ;;
   stow)
+    stow_or_die
     stow_all
     ;;
   auto-update)
     latest_all
 
-    if [[ "$AUTO_UPDATE_STOW" == "1" ]]; then
-      stow_all
+    if [[ "$AUTO_UPDATE_STOW" != "1" ]]; then
+      info "Stow disabled for $(style "action" "auto-update")."
+      info i "Set AUTO_UPDATE_STOW=1 inside your config to enable it."
+      exit 1
     fi
+
+    stow_or_die
+    stow_all
     ;;
   service)
     if [[ ${#ARGS_REST[@]} -eq 0 ]]; then
@@ -109,7 +115,7 @@ case "$function" in
     elif [[ "${ARGS_REST[0]}" == "log" ]]; then
       journalctl --user -f -u nos-auto-update.service
     else
-      error "Unknown service action $(style "green" "${ARGS_REST[0]}")."
+      error "Unknown service action $(style "action" "${ARGS_REST[0]}")."
       exit 1
     fi
     ;;
@@ -117,7 +123,7 @@ case "$function" in
     usage
     ;;
   *)
-    echo "Unknown function: $function" >&2
+    echo "Unknown function $(style "command" "$function")" >&2
     exit 1
     ;;
 esac

@@ -1,9 +1,9 @@
 source "$(dirname "${BASH_SOURCE[0]}")/output.sh"
 
-network_or_die() {
-  timeout_sec=20
+NETWORK_TIMEOUT_SEC=20
 
-  timeout "$timeout_sec" bash -c '
+network_or_die() {
+  timeout "$NETWORK_TIMEOUT_SEC" bash -c '
     slept=0
     until curl -fs --max-time 5 https://example.com >/dev/null; do
       if (( slept == 0 )); then
@@ -28,10 +28,17 @@ network_or_die() {
   if (( status == 124 )); then
     error "No network connection. Exiting..."
     exit 1
-  elif (( status > 0 && status <= (timeout_sec + 2) )); then
+  elif (( status > 0 && status <= (NETWORK_TIMEOUT_SEC + 2) )); then
     echo "  Great success, we got network."
   elif (( status != 0 )); then
-    error "Error while waiting for network. Exit code: $(style "yellow" "$status")."
+    error "Error while waiting for network. Exit code: $(style "blue" "$status")."
+    exit 1
+  fi
+}
+
+stow_or_die() {
+  if [[ "$_WITH_STOW" != "1" ]]; then
+    info "Can't locate the stow command."
     exit 1
   fi
 }

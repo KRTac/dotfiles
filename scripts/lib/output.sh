@@ -26,7 +26,7 @@ if command -v tput &>/dev/null; then
   TEXT_RESET=$(tput sgr0)
 fi
 
-get_effect_code() {
+print_effect_code() {
   case "$1" in
     black)
       printf "$TEXT_FG_BLACK"
@@ -70,12 +70,31 @@ get_effect_code() {
 
 style() {
   styles="$1"
-  [[ "$styles" == "path" ]] && styles="bold,blue"
+
+  case "$styles" in
+    path)
+      styles="blue,bold"
+      ;;
+    command)
+      styles="cyan"
+      ;;
+    action)
+      styles="green,bold"
+      ;;
+    option)
+      styles="magenta"
+      ;;
+    num)
+      styles="yellow"
+      ;;
+    *)
+      ;;
+  esac
 
   IFS=',' read -ra styles <<< "$styles"
 
   for style in "${styles[@]}"; do
-    get_effect_code "$style"
+    print_effect_code "$style"
   done
 
   printf '%s%s' "$2" "$TEXT_RESET"
@@ -96,17 +115,17 @@ error() {
 
 usage() {
   printf "Usage: $0\
- $(style 'cyan' '<function>')\
- [$(style 'yellow' '-optionA')]\
- [$(style 'magenta' '-optionB ')\
+ $(style 'command' '<function>')\
+ [$(style 'option' '-optionA')]\
+ [$(style 'option' '-optionB ')\
  $(style 'path' '~/file')]\n"
   echo "WIP"
 }
 
 missing_config() {
   echo "Missing config. Generate sample:"
-  echo "$(style 'bold,cyan' "$0")"\
-    "$(style 'green' 'sample-config') >"\
+  echo "$(style 'command' "$0")"\
+    "$(style 'action' 'sample-config') >"\
     "$(style 'path' '~/.config/nos/config')"
 }
 
@@ -134,6 +153,6 @@ NIXOS_PATH=~/configs/nixos
 NIXOS_REPO=git@github.com:SampleUser/nixos-conf.git
 
 # ~/.ssh/ key to be used for git. If you don't want to or can't use your regular key.
-#REPO_SSH_KEY=id_ed25519
+#REPO_SSH_KEY=id_ed25519.dockfiles
 EOF
 }
