@@ -104,6 +104,10 @@ case "$function" in
     elif [[ "${ARGS_REST[0]}" == "stop" ]]; then
       info "Stopping service timer..."
       systemctl --user stop nos-auto-update.timer
+    elif [[ "${ARGS_REST[0]}" == "status" ]]; then
+      systemctl --user status nos-auto-update.service
+    elif [[ "${ARGS_REST[0]}" == "log" ]]; then
+      journalctl --user -f -u nos-auto-update.service
     else
       error "Unknown service action $(style "green" "${ARGS_REST[0]}")."
       exit 1
