@@ -92,7 +92,7 @@ case "$function" in
     if [[ "$AUTO_UPDATE_STOW" != "1" ]]; then
       info "Stow disabled for $(style "action" "auto-update")."
       info i "Set AUTO_UPDATE_STOW=1 inside your config to enable it."
-      exit 1
+      exit 0
     fi
 
     stow_or_die
