@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
 
+_NIXOS_BIN="/run/current-system/sw/bin"
+
+if [[ -d "$_NIXOS_BIN" ]]; then
+  PATH="$_NIXOS_BIN:$PATH"
+fi
+
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/output.sh"
 source "$SCRIPT_DIR/lib/repos.sh"
