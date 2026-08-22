@@ -32,7 +32,7 @@ while [[ $# -gt 0 ]]; do
       _STOW_DRY_RUN=1
       shift
       ;;
-    --y|--yes)
+    -y|--yes)
       _WITH_YES=1
       shift
       ;;
@@ -194,7 +194,7 @@ case "$function" in
             "$(style "option" "--flake")"\
             "$(style "path" "$NIXOS_PATH#$NIXOS_BUILD_HOSTNAME")"
           read -p "  Continue? (Y/n): " confirm\
-            && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]]\
+            && [[ "$confirm" == "" || $confirm == [yY] || $confirm == [yY][eE][sS] ]]\
             || exit 1
         fi
 
