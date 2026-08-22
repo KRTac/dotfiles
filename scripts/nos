@@ -15,6 +15,7 @@ shift
 
 ARGS_REST=()
 _STOW_DRY_RUN=
+_WITH_YES=
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -29,6 +30,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --dry-run)
       _STOW_DRY_RUN=1
+      shift
+      ;;
+    --y|--yes)
+      _WITH_YES=1
       shift
       ;;
     *)
@@ -179,6 +184,18 @@ case "$function" in
           info "NixOS build hostname not set."\
             "$(style "option" "NIXOS_BUILD_HOSTNAME") in the config"
           exit 1
+        fi
+
+        if [[ "$_WITH_YES" != "1" ]]; then
+          info "About to rebuild NixOS:"
+          info i "$(style "bold" "sudo")"\
+            "$(style "command" "nixos-rebuild")"\
+            "$(style "action" "switch")"\
+            "$(style "option" "--flake")"\
+            "$(style "path" "$NIXOS_PATH#$NIXOS_BUILD_HOSTNAME")"
+          read -p "  Continue? (Y/n): " confirm\
+            && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]]
+            || exit 1
         fi
 
         sudo nixos-rebuild switch --flake "$NIXOS_PATH#$NIXOS_BUILD_HOSTNAME"
