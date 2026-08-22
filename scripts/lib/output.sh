@@ -148,9 +148,10 @@ PUBLIC_REPO=git@github.com:SampleUser/dotfiles.git
 PRIVATE_PATH=~/configs/dotfiles-private
 PRIVATE_REPO=git@github.com:SampleUser/dotfiles-private.git
 
-# Optional NixOS config files repo.
+# Optional NixOS config.
 NIXOS_PATH=~/configs/nixos
 NIXOS_REPO=git@github.com:SampleUser/nixos-conf.git
+NIXOS_BUILD_HOSTNAME=my-nixos
 
 # ~/.ssh/ key to be used for git. If you don't want to or can't use your regular key.
 #REPO_SSH_KEY=id_ed25519.dockfiles
