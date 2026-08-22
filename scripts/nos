@@ -194,7 +194,7 @@ case "$function" in
             "$(style "option" "--flake")"\
             "$(style "path" "$NIXOS_PATH#$NIXOS_BUILD_HOSTNAME")"
           read -p "  Continue? (Y/n): " confirm\
-            && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]]
+            && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]]\
             || exit 1
         fi
 
