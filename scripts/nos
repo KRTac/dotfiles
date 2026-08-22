@@ -172,11 +172,13 @@ case "$function" in
         if [[ -z "$NIXOS_PATH" ]]; then
           info "NixOS flake path not set."\
             "$(style "option" "NIXOS_PATH") in the config"
+          exit 1
         fi
 
         if [[ -z "$NIXOS_BUILD_HOSTNAME" ]]; then
           info "NixOS build hostname not set."\
             "$(style "option" "NIXOS_BUILD_HOSTNAME") in the config"
+          exit 1
         fi
 
         sudo nixos-rebuild switch --flake "$NIXOS_PATH#$NIXOS_BUILD_HOSTNAME"
