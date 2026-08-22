@@ -119,7 +119,8 @@ run_stow() {
 
   if [[ -z "$_WITH_STOW" ]]; then
     error "$(style "command" "stow") command not found."
-    info i "Install GNU Stow to symlink the files to the STOW_TARGET directory."
+    info i "Install GNU Stow to symlink the files to the"\
+      "$(style "option" "STOW_TARGET") directory."
     return
   fi
 

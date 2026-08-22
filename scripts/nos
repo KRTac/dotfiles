@@ -161,6 +161,32 @@ case "$function" in
   help)
     usage
     ;;
+  os)
+    if [[ ${#ARGS_REST[@]} -eq 0 ]]; then
+      error "No OS action specified."
+      exit 1
+    fi
+
+    case "${ARGS_REST[0]}" in
+      build)
+        if [[ -z "$NIXOS_PATH" ]]; then
+          info "NixOS flake path not set."\
+            "$(style "option" "NIXOS_PATH") in the config"
+        fi
+
+        if [[ -z "$NIXOS_BUILD_HOSTNAME" ]]; then
+          info "NixOS build hostname not set."\
+            "$(style "option" "NIXOS_BUILD_HOSTNAME") in the config"
+        fi
+
+        sudo nixos-rebuild switch --flake "$NIXOS_PATH#$NIXOS_BUILD_HOSTNAME"
+        ;;
+      *)
+        error "Unknown OS action $(style "action" "${ARGS_REST[0]}")."
+        exit 1
+        ;;
+    esac
+    ;;
   *)
     echo "Unknown function $(style "command" "$function")" >&2
     exit 1

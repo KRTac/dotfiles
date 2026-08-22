@@ -115,18 +115,18 @@ error() {
 
 usage() {
   printf "Usage: $0\
- $(style 'command' '<function>')\
- [$(style 'option' '-optionA')]\
- [$(style 'option' '-optionB ')\
- $(style 'path' '~/file')]\n"
+ $(style "command" "<function>")\
+ [$(style "option" "-optionA")]\
+ [$(style "option" "-optionB")\
+ $(style "path" "~/file")]\n"
   echo "WIP"
 }
 
 missing_config() {
   echo "Missing config. Generate sample:"
-  echo "$(style 'command' "$0")"\
-    "$(style 'action' 'sample-config') >"\
-    "$(style 'path' '~/.config/nos/config')"
+  echo "$(style "command" "$0")"\
+    "$(style "action" "sample-config") >"\
+    "$(style "path" "~/.config/nos/config")"
 }
 
 sample_config() {
