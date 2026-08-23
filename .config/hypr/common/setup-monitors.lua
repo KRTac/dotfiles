@@ -104,9 +104,11 @@ local function setup_monitors(withNotif)
         hl.dsp.focus({
             monitor = laptopMonitor,
         })
+
+        withNotif = false
     end
 
-    if withNotif and notificationMain then
+    if withNotif then
         hl.exec_cmd(string.format(
             "notify-send -t %d -e '%s' '%s'",
             notificationDurationMs,
