@@ -74,7 +74,8 @@ local function setup_monitors(withNotif)
             vrr = 0
         })
 
-        hl.exec_cmd("hyprctl dispatch moveworkspacetomonitor '1 " .. externalMonitor .."'")
+        hl.dispatch(hl.dsp.workspace.move({ workspace = 1, monitor = externalMonitor }))
+        hl.dispatch(hl.dsp.workspace.move({ workspace = 2, monitor = laptopMonitor }))
 
         hl.dsp.focus({
             monitor = externalMonitor,

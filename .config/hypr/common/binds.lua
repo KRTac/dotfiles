@@ -1,5 +1,3 @@
-hl.bind("SUPER + T", hl.dsp.exec_cmd("ghostty"), { description = "Ghostty Terminal" })
-
 hl.bind("SUPER + space", hl.dsp.exec_cmd("dms ipc call spotlight toggle"))
 hl.bind("ALT + space", hl.dsp.exec_cmd("dms ipc call spotlight-bar toggle"))
 hl.bind("SUPER + V", hl.dsp.exec_cmd("dms ipc call clipboard toggle"))
@@ -13,7 +11,7 @@ hl.bind("SUPER + X", hl.dsp.exec_cmd("dms ipc call powermenu toggle"))
 hl.bind("SUPER + SHIFT + BackSpace", hl.dsp.exec_cmd("dms ipc call keybinds toggle hyprland"))
 
 hl.bind("SUPER + ALT + L", hl.dsp.exec_cmd("dms ipc call lock lock"))
-hl.bind("SUPER + SHIFT + E", hl.dsp.exit())
+hl.bind("SUPER + SHIFT + Q", hl.dsp.exit())
 hl.bind("CTRL + ALT + Delete", hl.dsp.exec_cmd("dms ipc call processlist focusOrToggle"))
 
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("dms ipc call audio increment 3"), { locked = true, repeating = true })
@@ -106,5 +104,7 @@ hl.bind("ALT + Print", hl.dsp.exec_cmd("dms screenshot window"))
 
 hl.bind("SUPER + SHIFT + P", hl.dsp.dpms({ action = "toggle" }), { description = "Monitors on/off" })
 
+hl.bind("SUPER + T", hl.dsp.exec_cmd("ghostty"), { description = "Ghostty Terminal" })
 hl.bind("SUPER + E", hl.dsp.exec_cmd("nautilus"), { description = "Nautilus File Manager" })
 hl.bind("SUPER + B", hl.dsp.exec_cmd("firefox"), { description = "Firefox" })
+hl.bind("SUPER + C", hl.dsp.exec_cmd("code"), { description = "VS Code" })
