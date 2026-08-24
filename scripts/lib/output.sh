@@ -7,8 +7,9 @@ TEXT_FG_MAGENTA=$'\033[35m'
 TEXT_FG_CYAN=$'\033[36m'
 TEXT_FG_WHITE=$'\033[37m'
 TEXT_BOLD=$'\033[1m'
-TEXT_UNDERLINE=$'\033[4m'
+TEXT_DIM=$'\033[38m'
 TEXT_REVERSE=$'\033[3m'
+TEXT_UNDERLINE=$'\033[4m'
 TEXT_RESET=$'\033[0m'
 
 if command -v tput &>/dev/null; then
@@ -21,8 +22,9 @@ if command -v tput &>/dev/null; then
   TEXT_FG_CYAN=$(tput setaf 6)
   TEXT_FG_WHITE=$(tput setaf 7)
   TEXT_BOLD=$(tput bold)
-  TEXT_UNDERLINE=$(tput smul)
+  TEXT_DIM=$(tput setaf 8)
   TEXT_REVERSE=$(tput rev)
+  TEXT_UNDERLINE=$(tput smul)
   TEXT_RESET=$(tput sgr0)
 fi
 
@@ -58,6 +60,9 @@ print_effect_code() {
     ul)
       printf "$TEXT_UNDERLINE"
       ;;
+    dim)
+      printf "$TEXT_DIM"
+      ;;
     rev)
       printf "$TEXT_REVERSE"
       ;;
@@ -91,13 +96,13 @@ style() {
       ;;
   esac
 
-  IFS=',' read -ra styles <<< "$styles"
+  IFS="," read -ra styles <<< "$styles"
 
   for style in "${styles[@]}"; do
     print_effect_code "$style"
   done
 
-  printf '%s%s' "$2" "$TEXT_RESET"
+  printf "%s%s" "$2" "$TEXT_RESET"
 }
 
 info() {
@@ -105,26 +110,63 @@ info() {
     shift
     echo "  $@"
   else
-    echo "$(style 'cyan' '▶') $@"
+    echo "$(style "cyan" "▶") $@"
   fi
 }
 
 error() {
-  echo "$(style 'red' '!!') $@"
+  echo "$(style "red" "!!") $@"
 }
 
 usage() {
-  printf "Usage: $0\
- $(style "command" "<function>")\
- [$(style "option" "-optionA")]\
- [$(style "option" "-optionB")\
- $(style "path" "~/file")]\n"
-  echo "WIP"
+  cat <<EOF
+Usage:
+$(echo \
+ "$0"\
+ "$(style "command" "<function>")"\
+ "[$(style "option" "-optionA")"\
+ "[$(style "path" "~/file")]]"\
+ "[$(style "action" "action")]"
+)
+
+Options:
+  $(style "option" "--config") $(style "path" "<config>")    Directly specify config file. Ignores $(style "path" "~/.config") files
+                       in that case, including $(style "path" "config.local").
+
+  $(style "option" "--dry-run")            Does a dry run for $(style "command" "stow") and $(style "command" "os") $(style "action" "build") so no actual
+                       changes are made.
+
+  $(style "option" "-y|--yes")             Bypass any confirmation requests.
+
+$(style "dim" "Note:") $(style "command" "<function>") $(style "dim" "must always be defined first.")
+
+Functions:
+  $(style "command" "init")         Git inits the defined repos.
+
+  $(style "command" "update")       Update the repos to origin/latest.
+
+  $(style "command" "stow")         Run GNU Stow on the public and eventual private directories.
+    $(style "action" "public")     Stow only public.
+    $(style "action" "private")    Stow only private.
+
+  $(style "command" "os")           NixOS helper actions.
+    $(style "action" "build")      Rebuild NixOS defined in the config.
+
+  $(style "command" "auto-update")  Runs $(style "command" "update") and $(style "command" "stow"). Used by the sytemd service.
+
+  $(style "command" "service")      Service actions.
+    $(style "action" "start")
+    $(style "action" "stop")
+    $(style "action" "status")
+    $(style "action" "log")
+
+  $(style "command" "help")         Show this.
+EOF
 }
 
 missing_config() {
-  echo "Missing config. Generate sample:"
-  echo "$(style "command" "$0")"\
+  error "Missing config. Generate sample:"
+  info i "$(style "command" "$0")"\
     "$(style "action" "sample-config") >"\
     "$(style "path" "~/.config/nos/config")"
 }

@@ -49,8 +49,11 @@ if [[ "$_FUNCTION" == "sample-config" ]]; then
   exit 0
 fi
 
+_WITH_LOCAL_CONFIG=1
+
 if [[ -f "$CFG_PATH" ]]; then
   CFG_PATH="$(realpath "$CFG_PATH")"
+  _WITH_LOCAL_CONFIG=
 else
   CFG_PATH="$HOME/.config/nos/config"
 fi
@@ -65,7 +68,7 @@ fi
 
 CFG_LOCAL_PATH="$HOME/.config/nos/config.local"
 
-if [[ -f "$CFG_LOCAL_PATH" ]]; then
+if [[ -n "$_WITH_LOCAL_CONFIG" && -f "$CFG_LOCAL_PATH" ]]; then
   info "Local config detected in $(style "path" "$CFG_LOCAL_PATH")"
   source "$CFG_LOCAL_PATH"
   _CFG_LOADED=1
