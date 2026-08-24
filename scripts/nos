@@ -178,13 +178,13 @@ case "$_FUNCTION" in
 
         if [[ -z "$NIXOS_PATH" ]]; then
           error "NixOS path not set."\
-            "$(style "option" "NIXOS_PATH") in the config"
+            "$(style "option" "NIXOS_PATH") in the config."
           exit 1
         fi
 
         if [[ -z "$NIXOS_BUILD_HOSTNAME" ]]; then
           error "NixOS build hostname not set."\
-            "$(style "option" "NIXOS_BUILD_HOSTNAME") in the config"
+            "$(style "option" "NIXOS_BUILD_HOSTNAME") in the config."
           exit 1
         fi
 
