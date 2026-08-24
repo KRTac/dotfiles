@@ -130,7 +130,7 @@ run_stow() {
     mkdir -p "$STOW_TARGET"
   fi
 
-  if [[ "$_STOW_DRY_RUN" == "1" ]]; then
+  if [[ "$_DRY_RUN" == "1" ]]; then
     info "Source: $(style "path" "$1")"
     info i "Target: $(style "path" "$STOW_TARGET")"
     info i "Dry run only, no changes applied."

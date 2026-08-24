@@ -1,7 +1,5 @@
 STOW_TARGET=~/
 
-#STOW_DRY_RUN=1
-
 AUTO_UPDATE_STOW=1
 
 PUBLIC_PATH=~/configs/dotfiles

@@ -10,12 +10,13 @@ if [[ $# -lt 1 ]]; then
   exit 1
 fi
 
-function="$1"
+_FUNCTION="$1"
 shift
 
 ARGS_REST=()
-_STOW_DRY_RUN=
+_DRY_RUN=
 _WITH_YES=
+_WITH_STOW=
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -29,7 +30,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --dry-run)
-      _STOW_DRY_RUN=1
+      _DRY_RUN=1
       shift
       ;;
     -y|--yes)
@@ -43,7 +44,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$function" == "sample-config" ]]; then
+if [[ "$_FUNCTION" == "sample-config" ]]; then
   sample_config
   exit 0
 fi
@@ -54,18 +55,19 @@ else
   CFG_PATH="$HOME/.config/nos/config"
 fi
 
+_CFG_LOADED=
+
 if [[ -f "$CFG_PATH" ]]; then
   info "Sourcing configuration from $(style "path" "$CFG_PATH")"
   source "$CFG_PATH"
   _CFG_LOADED=1
 fi
 
-CFG_OVERRIDE_PATH="$HOME/.config/nos/config.local"
-AUTO_UPDATE_STOW=
+CFG_LOCAL_PATH="$HOME/.config/nos/config.local"
 
-if [[ -f "$CFG_OVERRIDE_PATH" ]]; then
-  info "Local config detected in $(style "path" "$CFG_OVERRIDE_PATH")"
-  source "$CFG_OVERRIDE_PATH"
+if [[ -f "$CFG_LOCAL_PATH" ]]; then
+  info "Local config detected in $(style "path" "$CFG_LOCAL_PATH")"
+  source "$CFG_LOCAL_PATH"
   _CFG_LOADED=1
 fi
 
@@ -74,21 +76,15 @@ if [[ -z "$_CFG_LOADED" ]]; then
   exit 1
 fi
 
-if [[ "$_STOW_DRY_RUN" != "1" ]]; then
-  _STOW_DRY_RUN="${STOW_DRY_RUN:-}"
-fi
-
 if [[ -n "$STOW_TARGET" ]]; then
   STOW_TARGET="$(realpath "$STOW_TARGET")"
 fi
 
 if command -v stow &>/dev/null; then
   _WITH_STOW=1
-else
-  _WITH_STOW=
 fi
 
-case "$function" in
+case "$_FUNCTION" in
   init)
     init_repos
     ;;
@@ -130,7 +126,7 @@ case "$function" in
     if [[ "$AUTO_UPDATE_STOW" != "1" ]]; then
       info "Stow disabled for $(style "action" "auto-update")."
       info i "Set AUTO_UPDATE_STOW=1 inside your config to enable it."
-      exit 0
+      exit
     fi
 
     stow_or_die
@@ -174,31 +170,38 @@ case "$function" in
 
     case "${ARGS_REST[0]}" in
       build)
+        if command -v nixos-rebuild &>/dev/null; then
+          error "$(style "command" "nixos-rebuild") not detected. Do you even NixOS?"
+          info i "You should really be on NixOS...btw"
+          exit 1
+        fi
+
         if [[ -z "$NIXOS_PATH" ]]; then
-          info "NixOS flake path not set."\
+          error "NixOS path not set."\
             "$(style "option" "NIXOS_PATH") in the config"
           exit 1
         fi
 
         if [[ -z "$NIXOS_BUILD_HOSTNAME" ]]; then
-          info "NixOS build hostname not set."\
+          error "NixOS build hostname not set."\
             "$(style "option" "NIXOS_BUILD_HOSTNAME") in the config"
           exit 1
         fi
 
-        if [[ "$_WITH_YES" != "1" ]]; then
-          info "About to rebuild NixOS:"
-          info i "$(style "bold" "sudo")"\
-            "$(style "command" "nixos-rebuild")"\
-            "$(style "action" "switch")"\
-            "$(style "option" "--flake")"\
-            "$(style "path" "$NIXOS_PATH#$NIXOS_BUILD_HOSTNAME")"
-          read -p "  Continue? (Y/n): " confirm\
-            && [[ "$confirm" == "" || $confirm == [yY] || $confirm == [yY][eE][sS] ]]\
-            || exit 1
-        fi
+        if [[ "$_DRY_RUN" == "1" ]]; then
+          info "Dry run. Would have executed the following:"
+          echo "$(styled_build)"
+        else
+          if [[ "$_WITH_YES" != "1" ]]; then
+            info "About to rebuild NixOS:"
+            info i "$(styled_build)"
+            read -p "  Continue? (Y/n): " confirm\
+              && [[ "$confirm" == "" || $confirm == [yY] || $confirm == [yY][eE][sS] ]]\
+              || exit
+          fi
 
-        sudo nixos-rebuild switch --flake "$NIXOS_PATH#$NIXOS_BUILD_HOSTNAME"
+          sudo nixos-rebuild switch --flake "$NIXOS_PATH#$NIXOS_BUILD_HOSTNAME"
+        fi
         ;;
       *)
         error "Unknown OS action $(style "action" "${ARGS_REST[0]}")."
@@ -207,7 +210,7 @@ case "$function" in
     esac
     ;;
   *)
-    echo "Unknown function $(style "command" "$function")" >&2
+    echo "Unknown function $(style "command" "$_FUNCTION")" >&2
     exit 1
     ;;
 esac

@@ -129,12 +129,17 @@ missing_config() {
     "$(style "path" "~/.config/nos/config")"
 }
 
+styled_build() {
+  printf "%s %s %s %s %s" "$(style "bold" "sudo")"\
+    "$(style "command" "nixos-rebuild")"\
+    "$(style "action" "switch")"\
+    "$(style "option" "--flake")"\
+    "$(style "path" "$NIXOS_PATH#$NIXOS_BUILD_HOSTNAME")"
+}
+
 sample_config() {
   cat <<EOF
 STOW_TARGET=~/
-
-# Simulated run without changes. Only shows what symlinks stow would create.
-#STOW_DRY_RUN=1
 
 # Whether to run stow during service updates.
 AUTO_UPDATE_STOW=1
