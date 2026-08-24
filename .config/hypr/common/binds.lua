@@ -60,7 +60,7 @@ hl.bind("SUPER + SHIFT + Page_Up", hl.dsp.window.move({ workspace = "e-1" }))
 hl.bind("SUPER + SHIFT + U", hl.dsp.window.move({ workspace = "e+1" }))
 hl.bind("SUPER + SHIFT + I", hl.dsp.window.move({ workspace = "e-1" }))
 
-hl.bind("CTRL + SHIFT + R", hl.dsp.exec_cmd("dms ipc call workspace-rename open"))
+hl.bind("SUPER + SHIFT + R", hl.dsp.exec_cmd("dms ipc call workspace-rename open"))
 
 hl.bind("SUPER + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
 hl.bind("SUPER + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
