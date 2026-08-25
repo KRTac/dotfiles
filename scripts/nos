@@ -203,7 +203,7 @@ case "$_FUNCTION" in
               || exit
           fi
 
-          sudo nixos-rebuild switch --flake "$NIXOS_PATH#$NIXOS_BUILD_HOSTNAME"
+          sudo nixos-rebuild switch "$([[ "$NIXOS_BUILD_FLAKE" == "1" ]] && printf "--flake")" "$NIXOS_PATH#$NIXOS_BUILD_HOSTNAME"
         fi
         ;;
       *)

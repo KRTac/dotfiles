@@ -11,5 +11,6 @@ PRIVATE_REPO=git@github.com:KRTac/dotfiles-private.git
 NIXOS_PATH=~/configs/nixos
 NIXOS_REPO=git@github.com:KRTac/nixos-conf.git
 NIXOS_BUILD_HOSTNAME=
+NIXOS_BUILD_FLAKE=1
 
 REPO_SSH_KEY=id_ed25519.dotfiles
