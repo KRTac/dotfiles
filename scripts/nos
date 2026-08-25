@@ -173,12 +173,6 @@ case "$_FUNCTION" in
 
     case "${ARGS_REST[0]}" in
       build)
-        if ! command -v nixos-rebuild &>/dev/null; then
-          error "$(style "command" "nixos-rebuild") not detected. Do you even NixOS?"
-          info i "You should really be on NixOS...btw"
-          exit 1
-        fi
-
         if [[ -z "$NIXOS_PATH" ]]; then
           error "NixOS path not set."\
             "$(style "option" "NIXOS_PATH") in the config."
@@ -195,6 +189,12 @@ case "$_FUNCTION" in
           info "Dry run. Would have executed the following:"
           info i "$(styled_build)"
         else
+          if ! command -v nixos-rebuild &>/dev/null; then
+            error "$(style "command" "nixos-rebuild") not detected. Do you even NixOS?"
+            info i "You should really be on NixOS...btw"
+            exit 1
+          fi
+
           if [[ "$_WITH_YES" != "1" ]]; then
             info "About to rebuild NixOS:"
             info i "$(styled_build)"
