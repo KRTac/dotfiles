@@ -119,6 +119,22 @@ error() {
 }
 
 usage() {
+  APPEND=""
+  if [[ "$_CFG_LOADED" != "1" ]]; then
+    SAMPLE_CMD="$(\
+      echo \
+        "$(style "bold" "$0")"\
+        "$(style "command" "sample-config")"\
+        ">"\
+        "$(style "path" "~/.config/nos/config")"\
+    )"
+    APPEND=$(
+      echo " Run the following to generate a config"
+      echo "                  file:"
+      printf "                  $SAMPLE_CMD"
+    )
+  fi
+
   cat <<EOF
 Usage:
 $(echo \
@@ -130,37 +146,39 @@ $(echo \
 )
 
 Options:
-  $(style "option" "--config") $(style "path" "<config>")    Directly specify config file. Ignores $(style "path" "~/.config") files
-                       in that case, including $(style "path" "config.local").
+  $(style "option" "--config") $(style "path" "<config>")   Directly specify config file. Ignores $(style "path" "~/.config") files
+                      in that case, including $(style "path" "config.local").
 
-  $(style "option" "--dry-run")            Does a dry run for $(style "command" "stow") and $(style "command" "os") $(style "action" "build") so no actual
-                       changes are made.
+  $(style "option" "--dry-run")           Does a dry run for $(style "command" "stow") and $(style "command" "os") $(style "action" "build") so no actual
+                      changes are made.
 
-  $(style "option" "-y|--yes")             Bypass any confirmation requests.
+  $(style "option" "-y, --yes")           Bypass any confirmation requests.
 
 $(style "dim" "Note:") $(style "command" "<function>") $(style "dim" "must always be defined first.")
 
 Functions:
-  $(style "command" "init")         Git inits the defined repos.
+  $(style "command" "init")            Git clone or update the defined repos.
 
-  $(style "command" "update")       Update the repos to origin/latest.
+  $(style "command" "update")          Update the repos to origin/latest.
 
-  $(style "command" "stow")         Run GNU Stow on the public and eventual private directories.
-    $(style "action" "public")     Stow only public.
-    $(style "action" "private")    Stow only private.
+  $(style "command" "stow")            Run GNU Stow on the public and eventual private dotfiles.
+    $(style "action" "public")        Stow only public.
+    $(style "action" "private")       Stow only private.
 
-  $(style "command" "os")           NixOS helper actions.
-    $(style "action" "build")      Rebuild NixOS defined in the config.
+  $(style "command" "os")              NixOS helper actions.
+    $(style "action" "build")         Rebuild NixOS defined in the config.
 
-  $(style "command" "auto-update")  Runs $(style "command" "update") and $(style "command" "stow"). Used by the sytemd service.
+  $(style "command" "auto-update")     Runs $(style "command" "update") and $(style "command" "stow"). Used by the sytemd service.
 
-  $(style "command" "service")      Service actions.
+  $(style "command" "service")         Service actions.
     $(style "action" "start")
     $(style "action" "stop")
     $(style "action" "status")
     $(style "action" "log")
 
-  $(style "command" "help")         Show this.
+  $(style "command" "help")            Show this.
+
+  $(style "command" "sample-config")   Output a sample config.$APPEND
 EOF
 }
 

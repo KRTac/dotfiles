@@ -61,7 +61,7 @@ fi
 _CFG_LOADED=
 
 if [[ -f "$CFG_PATH" ]]; then
-  info "Sourcing configuration from $(style "path" "$CFG_PATH")"
+  info "$(style "dim" "Sourcing configuration from $(style "path" "$CFG_PATH")")"
   source "$CFG_PATH"
   _CFG_LOADED=1
 fi
@@ -69,7 +69,7 @@ fi
 CFG_LOCAL_PATH="$HOME/.config/nos/config.local"
 
 if [[ -n "$_WITH_LOCAL_CONFIG" && -f "$CFG_LOCAL_PATH" ]]; then
-  info "Local config detected in $(style "path" "$CFG_LOCAL_PATH")"
+  info "$(style "dim" "Local config detected in $(style "path" "$CFG_LOCAL_PATH")")"
   source "$CFG_LOCAL_PATH"
   _CFG_LOADED=1
 fi
