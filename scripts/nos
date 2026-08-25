@@ -193,7 +193,7 @@ case "$_FUNCTION" in
 
         if [[ "$_DRY_RUN" == "1" ]]; then
           info "Dry run. Would have executed the following:"
-          echo "$(styled_build)"
+          info i "$(styled_build)"
         else
           if [[ "$_WITH_YES" != "1" ]]; then
             info "About to rebuild NixOS:"
