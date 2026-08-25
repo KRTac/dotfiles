@@ -173,7 +173,7 @@ case "$_FUNCTION" in
 
     case "${ARGS_REST[0]}" in
       build)
-        if command -v nixos-rebuild &>/dev/null; then
+        if ! command -v nixos-rebuild &>/dev/null; then
           error "$(style "command" "nixos-rebuild") not detected. Do you even NixOS?"
           info i "You should really be on NixOS...btw"
           exit 1
