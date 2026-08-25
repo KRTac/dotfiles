@@ -199,7 +199,7 @@ case "$_FUNCTION" in
             info "About to rebuild NixOS:"
             info i "$(styled_build)"
             read -p "  Continue? (Y/n): " confirm\
-              && [[ "$confirm" == "" || $confirm == [yY] || $confirm == [yY][eE][sS] ]]\
+              && [[ -z $confirm || $confirm == [yY] || $confirm == [yY][eE][sS] ]]\
               || exit
           fi
 
