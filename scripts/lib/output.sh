@@ -138,7 +138,7 @@ usage() {
   cat <<EOF
 Usage:
 $(echo \
- "$0"\
+ "$(style "bold" "$0")"\
  "$(style "command" "<function>")"\
  "[$(style "option" "-optionA")"\
  "[$(style "path" "~/file")]]"\
@@ -146,13 +146,13 @@ $(echo \
 )
 
 Options:
-  $(style "option" "--config") $(style "path" "<config>")   Directly specify config file. Ignores $(style "path" "~/.config") files
-                      in that case, including $(style "path" "config.local").
+  $(style "option" "--config") $(style "path" "<config>")   Directly specify a config file. Ignores $(style "path" "~/.config") files in
+                      that case, including $(style "path" "config.local").
 
-  $(style "option" "--dry-run")           Does a dry run for $(style "command" "stow") and $(style "command" "os") $(style "action" "build") so no actual
-                      changes are made.
+  $(style "option" "--dry-run")           Does a dry run for $(style "command" "stow") and $(style "command" "os") $(style "action" "build") so no actual changes
+                      are made.
 
-  $(style "option" "-y, --yes")           Bypass any confirmation requests.
+  $(style "option" "-y, --yes")           Bypass any confirmation requests, i.e. for $(style "command" "os") $(style "action" "build").
 
 $(style "dim" "Note:") $(style "command" "<function>") $(style "dim" "must always be defined first.")
 
@@ -184,8 +184,8 @@ EOF
 
 missing_config() {
   error "Missing config. Generate sample:"
-  info i "$(style "command" "$0")"\
-    "$(style "action" "sample-config") >"\
+  info i "$(style "bold" "$0")"\
+    "$(style "command" "sample-config") >"\
     "$(style "path" "~/.config/nos/config")"
 }
 
