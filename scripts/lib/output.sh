@@ -190,10 +190,11 @@ missing_config() {
 }
 
 styled_build() {
-  printf "%s %s %s %s %s" "$(style "bold" "sudo")"\
+  printf "%s %s %s %s %s"\
+    "$(style "bold" "sudo")"\
     "$(style "command" "nixos-rebuild")"\
     "$(style "action" "switch")"\
-    "$([[ "$NIXOS_BUILD_FLAKE" == "1" ]] && printf "$(style "option" "--flake")")"
+    "$([[ "$NIXOS_BUILD_FLAKE" == "1" ]] && printf "$(style "option" "--flake")")"\
     "$(style "path" "$NIXOS_PATH#$NIXOS_BUILD_HOSTNAME")"
 }
 
