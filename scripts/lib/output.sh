@@ -87,10 +87,10 @@ style() {
       styles="green,bold"
       ;;
     option)
-      styles="magenta"
+      styles="yellow"
       ;;
     num)
-      styles="yellow"
+      styles="white"
       ;;
     *)
       ;;
