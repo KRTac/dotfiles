@@ -76,10 +76,7 @@ local function setup_monitors(withNotif)
 
     hl.dispatch(hl.dsp.workspace.move({ workspace = 1, monitor = externalMonitor }))
     hl.dispatch(hl.dsp.workspace.move({ workspace = 2, monitor = laptopMonitor }))
-
-    hl.dsp.focus({
-      monitor = externalMonitor,
-    })
+    hl.dispatch(hl.dsp.focus({ monitor = externalMonitor }))
 
     if withNotif then
       notificationMain = "Display connected"
@@ -101,10 +98,7 @@ local function setup_monitors(withNotif)
     })
 
     hl.dispatch(hl.dsp.workspace.move({ workspace = 1, monitor = laptopMonitor }))
-
-    hl.dsp.focus({
-      monitor = laptopMonitor,
-    })
+    hl.dispatch(hl.dsp.focus({ monitor = laptopMonitor }))
 
     withNotif = false
   end
