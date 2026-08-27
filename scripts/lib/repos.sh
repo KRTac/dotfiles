@@ -54,6 +54,7 @@ init_repo() {
     info "Git repository detected in $(style 'path' "$dir")"
     info i "Fast-forwarding the repo if possible."
 
+    _git "$dir" remote set-url origin "$repoUrl"
     repo_to_latest "$dir"
   else
     info "Cloning repo from"\
