@@ -233,15 +233,12 @@ post_install() {
       fi
     fi
 
-    if [[ -d "$_PRIVATE_TARGET/.ssh" ]]; then
-      echo "Detected .ssh/ in the private repo."
-      if read -p "Symlink the files inside it to ~/.ssh? (Y/n): " confirm \
-        && [[ -z $confirm || $confirm == [yY] || $confirm == [yY][eE][sS] ]];
-      then
-        mkdir -p "$_NEW_USER_HOME/.ssh"
-        stow -d "$_PRIVATE_TARGET/.ssh" -t "$_NEW_USER_HOME/.ssh" --no-folding .
-        echo "SSH keys symlinked."
-      fi
+    echo "Running stow on the public and private repos."
+    stow -d "$_PUBLIC_TARGET" -t "$_NEW_USER_HOME" --no-folding .
+    stow -d "$_PRIVATE_TARGET" -t "$_NEW_USER_HOME" --no-folding .
+
+    if [[ -d "$_NEW_USER_HOME/.ssh" ]]; then
+      chmod 600 "$_NEW_USER_HOME/.ssh"/*
     fi
 
     echo "That's all folks. Bye!"
