@@ -139,12 +139,11 @@ format_and_install() {
 
         if yes_no "Format the disk using disko? (y/N): "; then
           echo "Wiping disk and reformatting."
-          run_disko destroy,format "$_HOST_PATH/disk-config.nix"
+          run_disko destroy,format,mount "$_HOST_PATH/disk-config.nix"
         else
           echo "Skipping reformatting."
+          run_disko mount "$_HOST_PATH/disk-config.nix"
         fi
-
-        run_disko mount "$_HOST_PATH/disk-config.nix"
       else
         echo "No disko config found."
       fi
