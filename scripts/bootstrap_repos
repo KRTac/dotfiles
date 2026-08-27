@@ -25,7 +25,7 @@ repo_select() {
       --border \
       --delimiter=$'\t' \
       --with-shell=bash \
-      --prompt='󰊤 Repository: '
+      --prompt='Repository: '
   )
 
   if [[ -n "$repo" ]]; then
@@ -105,18 +105,19 @@ format_and_install() {
   if [[ "$_PROVIDER" == "GitHub" ]]; then
     gh_auth_or_die
 
+    echo "Select NixOS repo"
     _NIXOS_REPO="$(repo_select)"
     echo "NixOS repo: $_NIXOS_REPO"
     _NIXOS_TARGET="$(define_path "NixOS target path: ")"
     echo "Cloning the NixOS repo."
     repo_setup "$_NIXOS_REPO" "$_NIXOS_TARGET"
 
-    _ORIGINAL_DIR="$(pwd)"
+    clear
+    echo "Select host configuration:"
 
-    cd "$_NIXOS_TARGET"
     _NIXOS_HOST=$( \
       nix --extra-experimental-features "nix-command flakes" \
-      eval --json .#nixosConfigurations \
+      eval --json "$_NIXOS_TARGET#nixosConfigurations" \
       --apply builtins.attrNames |
       jq -r '.[]' |
       fzf \
@@ -125,7 +126,7 @@ format_and_install() {
         --border \
         --delimiter=$'\t' \
         --with-shell=bash \
-        --prompt='Hosts: '
+        --prompt='Available config hosts: '
     )
 
     _HOST_PATH="$_NIXOS_TARGET/hosts/$_NIXOS_HOST"
@@ -150,12 +151,13 @@ format_and_install() {
 
       echo "Running nixos-install:"
       echo "sudo nixos-install --flake $_NIXOS_TARGET#$_NIXOS_HOST"
+      exit
 
       while true; do
         sudo nixos-install --flake "$_NIXOS_TARGET#$_NIXOS_HOST"
 
         if $?; then
-          echo "Installation successful. You can reboot."
+          echo "Installation successful."
           post_install
           break
         fi
@@ -179,6 +181,8 @@ format_and_install() {
 }
 
 post_install() {
+  _PROVIDER="$(select_provider)"
+
   if [[ "$_PROVIDER" == "GitHub" ]]; then
     gh_auth_or_die
 
@@ -197,6 +201,8 @@ post_install() {
       echo "Skipping private repo."
     fi
 
+    echo "Select NixOS repo"
+    _NIXOS_REPO="$(repo_select)"
     echo "NixOS repo: $_NIXOS_REPO"
     _NIXOS_TARGET="$(define_path "NixOS target path: ")"
 
@@ -244,4 +250,8 @@ post_install() {
   fi
 }
 
-format_and_install
+if [[ "$1" == "post" ]]; then
+  post_install
+else
+  format_and_install
+fi
