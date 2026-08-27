@@ -152,15 +152,15 @@ format_and_install() {
 
       echo "Running nixos-install:"
       echo "sudo nixos-install --flake $_NIXOS_TARGET#$_NIXOS_HOST"
-      exit
 
       while true; do
         sudo nixos-install --flake "$_NIXOS_TARGET#$_NIXOS_HOST"
+        status=$?
 
-        if $?; then
+        if status; then
           echo "Installation successful."
           post_install
-          break
+          exit
         fi
 
         if ! yes_no "Installation failed. Retry it? (y/N): "; then
