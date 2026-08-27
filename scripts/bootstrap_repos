@@ -10,7 +10,7 @@ then
   exec nix \
     --extra-experimental-features "nix-command flakes" \
     shell nixpkgs#git nixpkgs#gh nixpkgs#fzf \
-    --command "$0"
+    --command "$0" "$@"
 fi
 
 repo_select() {
