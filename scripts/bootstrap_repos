@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+
+if ! command -v fzf &>/dev/null ||
+  ! command -v gh &>/dev/null ||
+  ! command -v jq &>/dev/null ||
+  ! command -v git &>/dev/null;
+then
+  echo "Starting Nix shell..."
+  exec nix \
+    --extra-experimental-features "nix-command flakes" \
+    shell nixpkgs#git nixpkgs#gh nixpkgs#fzf \
+    --command "$0"
+fi
+
 repo_select() {
   repo=$(
     gh repo list --limit 1000 \
@@ -33,98 +46,202 @@ define_path() {
 }
 
 repo_setup() {
+  mkdir -p "$2"
   gh repo clone "$1" "$2" -- --depth 1 --single-branch
 }
 
-repo_setup() {
-  gh repo clone "$1" "$2" -- --depth 1 --single-branch
+yes_no() {
+  read -rp "$1" confirm \
+    && [[ -n $confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]]]] \
+    || return 1
+
+  return 0
 }
 
-if ! command -v fzf &>/dev/null ||\
-  ! command -v gh &>/dev/null ||
-  ! command -v git &>/dev/null;
-then
-  echo "Starting Nix shell..."
-  exec nix \
-    --extra-experimental-features "nix-command flakes" \
-    shell nixpkgs#git nixpkgs#gh nixpkgs#fzf \
-    --command "$0"
-fi
+run_disco() {
+  sudo nix \
+    --experimental-features "nix-command flakes" \
+    run github:nix-community/disko/latest -- \
+    --mode "$1" "$2"
+}
 
-PS3="Select a provider: "
+select_provider() {
+  PS3="Select a provider: "
 
-select _PROVIDER in "GitHub"; do
-  case "$_PROVIDER" in
-    "GitHub")
-      break
-      ;;
-    "")
-      echo "Invalid service."
-      ;;
-    *)
-      break
-      ;;
-  esac
-done
+  select _PROVIDER in "GitHub"; do
+    case "$_PROVIDER" in
+      "GitHub")
+        break
+        ;;
+      "")
+        echo "Invalid service."
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
 
-if [[ "$_PROVIDER" == "GitHub" ]]; then
+  printf "$_PROVIDER"
+}
+
+gh_auth_or_die() {
   if ! gh auth status &>/dev/null; then
-      echo "Not logged into GitHub CLI. Starting auth:"
-      gh auth login
+    echo "Not logged into GitHub CLI. Starting auth:"
+    gh auth login
 
-      if ! gh auth status &>/dev/null; then
-        echo "GitHub auth not successful. Exiting..."
-        exit 1
-      fi
+    if ! gh auth status &>/dev/null; then
+      echo "GitHub auth not successful. Exiting..."
+      exit 1
+    fi
   fi
+}
 
-  echo "Select the public repo:"
-  _PUBLIC_REPO="$(repo_select)"
-  echo "Public repo: $_PUBLIC_REPO"
-  _PUBLIC_TARGET="$(define_path "Public target path: ")"
+format_and_install() {
+  echo "Select the NixOS config repo."
+  _PROVIDER="$(select_provider)"
 
-  echo "Select the private repo (optional, Ctrl+C to skip):"
-  _PRIVATE_REPO="$(repo_select)"
+  if [[ "$_PROVIDER" == "GitHub" ]]; then
+    gh_auth_or_die
 
-  if [[ -n "$_PRIVATE_REPO" ]]; then
-    echo "Private repo: $_PRIVATE_REPO"
-    _PRIVATE_TARGET="$(define_path "Private target path: ")"
-  else
-    echo "Skipping private repo."
-  fi
-
-  echo "Select the NixOS repo (optional, Ctrl+C to skip):"
-  _NIXOS_REPO="$(repo_select)"
-
-  if [[ -n "$_NIXOS_REPO" ]]; then
+    _NIXOS_REPO="$(repo_select)"
     echo "NixOS repo: $_NIXOS_REPO"
     _NIXOS_TARGET="$(define_path "NixOS target path: ")"
-  else
-    echo "Skipping NixOS repo."
-  fi
-
-  echo "Cloning the public repo."
-  repo_setup "$_PUBLIC_REPO" "$_PUBLIC_TARGET"
-
-  if [[ -n "$_PRIVATE_REPO" ]]; then
-    echo "Cloning the private repo."
-    repo_setup "$_PRIVATE_REPO" "$_PRIVATE_TARGET"
-  fi
-
-  if [[ -n "$_NIXOS_REPO" ]]; then
     echo "Cloning the NixOS repo."
     repo_setup "$_NIXOS_REPO" "$_NIXOS_TARGET"
-  fi
 
-  if [[ -f "$_PUBLIC_TARGET/.config/nos/config" ]]; then
-    echo "Detected nos config in the public repo."
-    read -p "Copy it to ~/.config/nos/config.local? (Y/n): " confirm\
-      && [[ -z $confirm || $confirm == [yY] || $confirm == [yY][eE][sS] ]]\
-      || exit
+    _ORIGINAL_DIR="$(pwd)"
 
-    cp "$_PUBLIC_TARGET/.config/nos/config" "~/.config/nos/config.local"
+    cd "$_NIXOS_TARGET"
+    _NIXOS_HOST=$( \
+      nix --extra-experimental-features "nix-command flakes" \
+      eval --json .#nixosConfigurations \
+      --apply builtins.attrNames |
+      jq -r '.[]' |
+      fzf \
+        --height 50% \
+        --layout=reverse \
+        --border \
+        --delimiter=$'\t' \
+        --with-shell=bash \
+        --prompt='Hosts: '
+    )
+
+    _HOST_PATH="$_NIXOS_TARGET/hosts/$_NIXOS_HOST"
+
+    if [[ -d "$_HOST_PATH" ]]; then
+      echo "Host '$_NIXOS_HOST' selected."
+
+      if [[ -f "$_HOST_PATH/disk-config.nix" ]]; then
+        echo "Disco disk config detected. Use it to wipe your disk and reformat."
+        echo "That would wipe all your existing data on that disk."
+
+        if yes_no "Format the disk using disco? (y/N): "; then
+          echo "Wiping disk and reformatting."
+          run_disco destroy,format "$_HOST_PATH/disk-config.nix"
+        else
+          echo "Skipping reformatting."
+        fi
+
+        run_disco mount "$_HOST_PATH/disk-config.nix"
+      else
+        echo "No disco config found."
+      fi
+
+      echo "Running nixos-install:"
+      echo "sudo nixos-install --flake $_NIXOS_TARGET#$_NIXOS_HOST"
+
+      while true; do
+        sudo nixos-install --flake "$_NIXOS_TARGET#$_NIXOS_HOST"
+
+        if $?; then
+          echo "Installation successful. You can reboot."
+          post_install
+          break
+        fi
+
+        if ! yes_no "Installation failed. Retry it? (y/N): "; then
+          echo "Canceling installation."
+          exit 1
+        fi
+
+        echo "Retrying installation."
+      done
+    else
+      echo "Host '$_NIXOS_HOST' not found."
+      echo "$_HOST_PATH doesn't exist"
+      exit 1
+    fi
+  else
+    echo "Only GitHub currently supported. Exiting."
+    exit 1
   fi
-else
-  echo "Only GitHub currently supported. Exiting."
-  exit 1
-fi
+}
+
+post_install() {
+  if [[ "$_PROVIDER" == "GitHub" ]]; then
+    gh_auth_or_die
+
+    echo "Select the public repo:"
+    _PUBLIC_REPO="$(repo_select)"
+    echo "Public repo: $_PUBLIC_REPO"
+    _PUBLIC_TARGET="$(define_path "Public target path: ")"
+
+    echo "Select the private repo (optional, Ctrl+C to skip):"
+    _PRIVATE_REPO="$(repo_select)"
+
+    if [[ -n "$_PRIVATE_REPO" ]]; then
+      echo "Private repo: $_PRIVATE_REPO"
+      _PRIVATE_TARGET="$(define_path "Private target path: ")"
+    else
+      echo "Skipping private repo."
+    fi
+
+    echo "NixOS repo: $_NIXOS_REPO"
+    _NIXOS_TARGET="$(define_path "NixOS target path: ")"
+
+    echo "Cloning the public repo."
+    repo_setup "$_PUBLIC_REPO" "$_PUBLIC_TARGET"
+
+    if [[ -n "$_PRIVATE_REPO" ]]; then
+      echo "Cloning the private repo."
+      repo_setup "$_PRIVATE_REPO" "$_PRIVATE_TARGET"
+    fi
+
+    if [[ -n "$_NIXOS_REPO" ]]; then
+      echo "Cloning the NixOS repo."
+      repo_setup "$_NIXOS_REPO" "$_NIXOS_TARGET"
+    fi
+
+    _NEW_USER_HOME="$(define_path "New user's home directory: ")"
+
+    if [[ -f "$_PUBLIC_TARGET/.config/nos/config" ]]; then
+      echo "Detected nos config in the public repo."
+      if read -p "Copy it to ~/.config/nos/config.local? (Y/n): " confirm \
+        && [[ -z $confirm || $confirm == [yY] || $confirm == [yY][eE][sS] ]];
+      then
+        mkdir -p "$_NEW_USER_HOME/.config/nos"
+        cp "$_PUBLIC_TARGET/.config/nos/config" "$_NEW_USER_HOME/.config/nos/config.local"
+        echo "Copied nos config to $_NEW_USER_HOME/.config/nos/config.local"
+      fi
+    fi
+
+    if [[ -d "$_PRIVATE_TARGET/.ssh" ]]; then
+      echo "Detected .ssh/ in the private repo."
+      if read -p "Symlink the files inside it to ~/.ssh? (Y/n): " confirm \
+        && [[ -z $confirm || $confirm == [yY] || $confirm == [yY][eE][sS] ]];
+      then
+        mkdir -p "$_NEW_USER_HOME/.ssh"
+        stow -d "$_PRIVATE_TARGET/.ssh" -t "$_NEW_USER_HOME/.ssh" --no-folding .
+        echo "SSH keys symlinked."
+      fi
+    fi
+
+    echo "That's all folks. Bye!"
+  else
+    echo "Only GitHub currently supported. Exiting."
+    exit 1
+  fi
+}
+
+format_and_install
