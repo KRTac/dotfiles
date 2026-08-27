@@ -133,16 +133,16 @@ format_and_install() {
     if [[ -d "$_HOST_PATH" ]]; then
       echo "Host '$_NIXOS_HOST' selected."
 
-      if [[ -f "$_HOST_PATH/disk-config.nix" ]]; then
+      if [[ -f "$_HOST_PATH/disko-config.nix" ]]; then
         echo "Disko disk config detected. Use it to wipe your disk and reformat."
         echo "That would wipe all your existing data on that disk."
 
         if yes_no "Format the disk using disko? (y/N): "; then
           echo "Wiping disk and reformatting."
-          run_disko destroy,format,mount "$_HOST_PATH/disk-config.nix"
+          run_disko destroy,format,mount "$_HOST_PATH/disko-config.nix"
         else
           echo "Skipping reformatting."
-          run_disko mount "$_HOST_PATH/disk-config.nix"
+          run_disko mount "$_HOST_PATH/disko-config.nix"
         fi
       else
         echo "No disko config found."
