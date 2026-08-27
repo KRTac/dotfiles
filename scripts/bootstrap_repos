@@ -59,7 +59,7 @@ yes_no() {
   return 0
 }
 
-run_disco() {
+run_disko() {
   sudo nix \
     --experimental-features "nix-command flakes" \
     run github:nix-community/disko/latest -- \
@@ -134,19 +134,19 @@ format_and_install() {
       echo "Host '$_NIXOS_HOST' selected."
 
       if [[ -f "$_HOST_PATH/disk-config.nix" ]]; then
-        echo "Disco disk config detected. Use it to wipe your disk and reformat."
+        echo "Disko disk config detected. Use it to wipe your disk and reformat."
         echo "That would wipe all your existing data on that disk."
 
-        if yes_no "Format the disk using disco? (y/N): "; then
+        if yes_no "Format the disk using disko? (y/N): "; then
           echo "Wiping disk and reformatting."
-          run_disco destroy,format "$_HOST_PATH/disk-config.nix"
+          run_disko destroy,format "$_HOST_PATH/disk-config.nix"
         else
           echo "Skipping reformatting."
         fi
 
-        run_disco mount "$_HOST_PATH/disk-config.nix"
+        run_disko mount "$_HOST_PATH/disk-config.nix"
       else
-        echo "No disco config found."
+        echo "No disko config found."
       fi
 
       echo "Running nixos-install:"
