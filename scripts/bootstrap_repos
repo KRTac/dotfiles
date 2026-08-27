@@ -4,12 +4,13 @@
 if ! command -v fzf &>/dev/null ||
   ! command -v gh &>/dev/null ||
   ! command -v jq &>/dev/null ||
-  ! command -v git &>/dev/null;
+  ! command -v git &>/dev/null ||
+  ! command -v stow &>/dev/null;
 then
   echo "Starting Nix shell..."
   exec nix \
     --extra-experimental-features "nix-command flakes" \
-    shell nixpkgs#git nixpkgs#gh nixpkgs#fzf \
+    shell nixpkgs#git nixpkgs#gh nixpkgs#fzf nixpkgs#stow \
     --command "$0" "$@"
 fi
 
