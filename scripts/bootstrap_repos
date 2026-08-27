@@ -182,7 +182,9 @@ format_and_install() {
 }
 
 post_install() {
-  _PROVIDER="$(select_provider)"
+  if [[ -z $_PROVIDER ]]; then
+    _PROVIDER="$(select_provider)"
+  fi
 
   if [[ "$_PROVIDER" == "GitHub" ]]; then
     gh_auth_or_die
@@ -201,11 +203,15 @@ post_install() {
       echo "Private repo: $_PRIVATE_REPO"
       _PRIVATE_TARGET="$(define_path "Private target path: " "$_NEW_USER_HOME/configs/${_PRIVATE_REPO##*/}")"
     else
+      _PRIVATE_TARGET=
       echo "Skipping private repo."
     fi
 
-    echo "Select NixOS repo"
-    _NIXOS_REPO="$(repo_select)"
+    if [[ -z $_NIXOS_REPO ]]; then
+      echo "Select NixOS repo"
+      _NIXOS_REPO="$(repo_select)"
+    fi
+
     echo "NixOS repo: $_NIXOS_REPO"
     _NIXOS_TARGET="$(define_path "NixOS target path: " "$_NEW_USER_HOME/configs/${_NIXOS_REPO##*/}")"
 
@@ -217,10 +223,8 @@ post_install() {
       repo_setup "$_PRIVATE_REPO" "$_PRIVATE_TARGET"
     fi
 
-    if [[ -n "$_NIXOS_REPO" ]]; then
-      echo "Cloning the NixOS repo."
-      repo_setup "$_NIXOS_REPO" "$_NIXOS_TARGET"
-    fi
+    echo "Cloning the NixOS repo."
+    repo_setup "$_NIXOS_REPO" "$_NIXOS_TARGET"
 
     if [[ -f "$_PUBLIC_TARGET/.config/nos/config" ]]; then
       echo "Detected nos config in the public repo."
@@ -230,6 +234,17 @@ post_install() {
         mkdir -p "$_NEW_USER_HOME/.config/nos"
         cp "$_PUBLIC_TARGET/.config/nos/config" "$_NEW_USER_HOME/.config/nos/config.local"
         echo "Copied nos config to $_NEW_USER_HOME/.config/nos/config.local"
+
+        source "$_NEW_USER_HOME/.config/nos/config.local"
+        git -C "$_PUBLIC_TARGET" remote set-url origin "$PUBLIC_REPO"
+
+        if [[ -n "$_PRIVATE_REPO" && -n "$PRIVATE_REPO" ]]; then
+          git -C "$_PRIVATE_TARGET" remote set-url origin "$PRIVATE_REPO"
+        fi
+
+        if [[ -n "$NIXOS_REPO" ]]; then
+          git -C "$_NIXOS_TARGET" remote set-url origin "$NIXOS_REPO"
+        fi
       fi
     fi
 
