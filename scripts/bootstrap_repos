@@ -109,6 +109,7 @@ format_and_install() {
     _NIXOS_REPO="$(repo_select)"
     echo "NixOS repo: $_NIXOS_REPO"
     _NIXOS_TARGET="$(define_path "NixOS target path: " "${_NIXOS_REPO##*/}")"
+    _NIXOS_TARGET="$(realpath "$_NIXOS_TARGET")"
     echo "Cloning the NixOS repo."
     repo_setup "$_NIXOS_REPO" "$_NIXOS_TARGET"
 
