@@ -7,7 +7,6 @@ if ! command -v fzf &>/dev/null ||
   ! command -v git &>/dev/null;
 then
   echo "Starting Nix shell..."
-  echo "$0" "$@"
   exec nix \
     --extra-experimental-features "nix-command flakes" \
     shell nixpkgs#git nixpkgs#gh nixpkgs#fzf \
@@ -35,7 +34,7 @@ repo_select() {
 }
 
 define_path() {
-  read -rp "$1" path
+  read -er -i $2 -p "$1" path
 
   if [[ "$path" == "~" || "$path" == "~/"  ]]; then
     path="$HOME"
@@ -43,7 +42,7 @@ define_path() {
     path="$HOME/${path#\~/}"
   fi
 
-  echo "$(realpath "$path")"
+  echo "$path"
 }
 
 repo_setup() {
@@ -108,7 +107,7 @@ format_and_install() {
     echo "Select NixOS repo"
     _NIXOS_REPO="$(repo_select)"
     echo "NixOS repo: $_NIXOS_REPO"
-    _NIXOS_TARGET="$(define_path "NixOS target path: ")"
+    _NIXOS_TARGET="$(define_path "NixOS target path: " "${_NIXOS_REPO##*/}")"
     echo "Cloning the NixOS repo."
     repo_setup "$_NIXOS_REPO" "$_NIXOS_TARGET"
 
@@ -186,17 +185,19 @@ post_install() {
   if [[ "$_PROVIDER" == "GitHub" ]]; then
     gh_auth_or_die
 
+    _NEW_USER_HOME="$(define_path "New user's home directory: " "/mnt/home/")"
+
     echo "Select the public repo:"
     _PUBLIC_REPO="$(repo_select)"
     echo "Public repo: $_PUBLIC_REPO"
-    _PUBLIC_TARGET="$(define_path "Public target path: ")"
+    _PUBLIC_TARGET="$(define_path "Public target path: " "$_NEW_USER_HOME/configs/${_PUBLIC_REPO##*/}")"
 
     echo "Select the private repo (optional, Ctrl+C to skip):"
     _PRIVATE_REPO="$(repo_select)"
 
     if [[ -n "$_PRIVATE_REPO" ]]; then
       echo "Private repo: $_PRIVATE_REPO"
-      _PRIVATE_TARGET="$(define_path "Private target path: ")"
+      _PRIVATE_TARGET="$(define_path "Private target path: " "$_NEW_USER_HOME/configs/${_PRIVATE_REPO##*/}")"
     else
       echo "Skipping private repo."
     fi
@@ -204,7 +205,7 @@ post_install() {
     echo "Select NixOS repo"
     _NIXOS_REPO="$(repo_select)"
     echo "NixOS repo: $_NIXOS_REPO"
-    _NIXOS_TARGET="$(define_path "NixOS target path: ")"
+    _NIXOS_TARGET="$(define_path "NixOS target path: " "$_NEW_USER_HOME/configs/${_NIXOS_REPO##*/}")"
 
     echo "Cloning the public repo."
     repo_setup "$_PUBLIC_REPO" "$_PUBLIC_TARGET"
@@ -218,8 +219,6 @@ post_install() {
       echo "Cloning the NixOS repo."
       repo_setup "$_NIXOS_REPO" "$_NIXOS_TARGET"
     fi
-
-    _NEW_USER_HOME="$(define_path "New user's home directory: ")"
 
     if [[ -f "$_PUBLIC_TARGET/.config/nos/config" ]]; then
       echo "Detected nos config in the public repo."
