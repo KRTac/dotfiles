@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+
+
+repo_select() {
+  repo=$(
+    gh repo list --limit 1000 \
+      --json nameWithOwner,description \
+      --jq '.[] | [.nameWithOwner, (.description // "")] | @tsv' |
+    fzf \
+      --height 50% \
+      --layout=reverse \
+      --border \
+      --delimiter=$'\t' \
+      --with-shell=bash \
+      --prompt='󰊤 Repository: '
+  )
+
+  if [[ -n "$repo" ]]; then
+    repo=$(cut -f1 <<< "$repo")
+    printf "$repo"
+  fi
+}
+
+define_path() {
+  read -rp "$1" path
+
+  if [[ "$path" == "~" || "$path" == "~/"  ]]; then
+    path="$HOME"
+  elif [[ "$path" == "~/"* ]]; then
+    path="$HOME/${path#\~/}"
+  fi
+
+  echo "$(realpath "$path")"
+}
+
+repo_setup() {
+  gh repo clone "$1" "$2" -- --depth 1 --single-branch
+}
+
+if ! command -v fzf &>/dev/null ||\
+  ! command -v gh &>/dev/null ||
+  ! command -v git &>/dev/null; then
+  echo "Starting Nix shell..."
+  exec nix \
+    --extra-experimental-features "nix-command flakes" \
+    shell nixpkgs#git nixpkgs#gh nixpkgs#fzf \
+    --command "$0"
+fi
+
+PS3="Select a provider: "
+
+select _PROVIDER in "GitHub"; do
+  case "$_PROVIDER" in
+    "GitHub")
+      break
+      ;;
+    "")
+      echo "Invalid service."
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+if [[ "$_PROVIDER" == "GitHub" ]]; then
+  if ! gh auth status &>/dev/null; then
+      echo "Not logged into GitHub CLI. Starting auth:"
+      gh auth login
+
+      if ! gh auth status &>/dev/null; then
+        echo "GitHub auth not successful. Exiting..."
+        exit 1
+      fi
+  fi
+
+  echo "Select the public repo:"
+  _PUBLIC_REPO="$(repo_select)"
+  echo "Public repo: $_PUBLIC_REPO"
+  _PUBLIC_TARGET="$(define_path "Public target path: ")"
+
+  echo "Select the private repo (optional, Ctrl+C to skip):"
+  _PRIVATE_REPO="$(repo_select)"
+
+  if [[ -n "$_PRIVATE_REPO" ]]; then
+    echo "Private repo: $_PRIVATE_REPO"
+    _PRIVATE_TARGET="$(define_path "Private target path: ")"
+  else
+    echo "Skipping private repo."
+  fi
+
+  echo "Select the NixOS repo (optional, Ctrl+C to skip):"
+  _NIXOS_REPO="$(repo_select)"
+
+  if [[ -n "$_NIXOS_REPO" ]]; then
+    echo "NixOS repo: $_NIXOS_REPO"
+    _NIXOS_TARGET="$(define_path "NixOS target path: ")"
+  else
+    echo "Skipping NixOS repo."
+  fi
+
+  echo "Cloning the public repo."
+  repo_setup "$_PUBLIC_REPO" "$_PUBLIC_TARGET"
+
+  if [[ -n "$_PRIVATE_REPO" ]]; then
+    echo "Cloning the private repo."
+    repo_setup "$_PRIVATE_REPO" "$_PRIVATE_TARGET"
+  fi
+
+  if [[ -n "$_NIXOS_REPO" ]]; then
+    echo "Cloning the NixOS repo."
+    repo_setup "$_NIXOS_REPO" "$_NIXOS_TARGET"
+  fi
+else
+  echo "Only GitHub currently supported. Exiting."
+  exit 1
+fi
