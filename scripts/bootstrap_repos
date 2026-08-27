@@ -7,6 +7,7 @@ if ! command -v fzf &>/dev/null ||
   ! command -v git &>/dev/null;
 then
   echo "Starting Nix shell..."
+  echo "$0" "$@"
   exec nix \
     --extra-experimental-features "nix-command flakes" \
     shell nixpkgs#git nixpkgs#gh nixpkgs#fzf \
@@ -52,7 +53,7 @@ repo_setup() {
 
 yes_no() {
   read -rp "$1" confirm \
-    && [[ -n $confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]]]] \
+    && [[ -n $confirm && $confirm == [yY] ]] \
     || return 1
 
   return 0
