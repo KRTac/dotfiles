@@ -3,10 +3,16 @@ function file_exists(name)
   if f~=nil then io.close(f) return true else return false end
 end
 
+function config_exists(config)
+  return file_exists(os.getenv("HOME") .. "/.config/hypr/" .. config:gsub("%.", "/") .. ".lua")
+end
+
+function require_if_there(config)
+  if config_exists(config) then
+    require(config)
+  end
+end
+
 
 require("dms.init")
-
-local hyprmodImport = "hyprland-gui"
-if file_exists(os.getenv("HOME") .. "/.config/hypr/" .. hyprmodImport .. ".lua") then
-  require(hyprmodImport)
-end
+require_if_there("hyprland-gui")
