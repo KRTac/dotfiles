@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 repo_select() {
   repo=$(
     gh repo list --limit 1000 \
@@ -37,9 +36,14 @@ repo_setup() {
   gh repo clone "$1" "$2" -- --depth 1 --single-branch
 }
 
+repo_setup() {
+  gh repo clone "$1" "$2" -- --depth 1 --single-branch
+}
+
 if ! command -v fzf &>/dev/null ||\
   ! command -v gh &>/dev/null ||
-  ! command -v git &>/dev/null; then
+  ! command -v git &>/dev/null;
+then
   echo "Starting Nix shell..."
   exec nix \
     --extra-experimental-features "nix-command flakes" \
@@ -110,6 +114,15 @@ if [[ "$_PROVIDER" == "GitHub" ]]; then
   if [[ -n "$_NIXOS_REPO" ]]; then
     echo "Cloning the NixOS repo."
     repo_setup "$_NIXOS_REPO" "$_NIXOS_TARGET"
+  fi
+
+  if [[ -f "$_PUBLIC_TARGET/.config/nos/config" ]]; then
+    echo "Detected nos config in the public repo."
+    read -p "Copy it to ~/.config/nos/config.local? (Y/n): " confirm\
+      && [[ -z $confirm || $confirm == [yY] || $confirm == [yY][eE][sS] ]]\
+      || exit
+
+    cp "$_PUBLIC_TARGET/.config/nos/config" "~/.config/nos/config.local"
   fi
 else
   echo "Only GitHub currently supported. Exiting."
