@@ -87,7 +87,7 @@ select_provider() {
 }
 
 select_host_config() {
-  return $(
+  printf "$( \
     nix --extra-experimental-features "nix-command flakes" \
       eval --json "$1#nixosConfigurations" \
       --apply builtins.attrNames |
@@ -98,8 +98,8 @@ select_host_config() {
         --border \
         --delimiter=$'\t' \
         --with-shell=bash \
-        --prompt='Available config hosts: '
-  )
+        --prompt='Available config hosts: ' \
+  )"
 }
 
 gh_auth_or_die() {
