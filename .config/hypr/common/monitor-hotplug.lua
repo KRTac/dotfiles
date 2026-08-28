@@ -17,18 +17,15 @@ local function scale(value, startAt, endAt)
   return math.floor(scale * 100 + 0.5) / 100
 end
 
-local function executable_exists(name)
-  local handle = io.popen("command -v " .. name .. " 2>/dev/null")
-  local result = handle:read("*l")
-  handle:close()
-  return result ~= nil
-end
-
 local externalMonitor = "HDMI-A-5"
 local laptopMonitor = "eDP-1"
 local notificationDurationMs = 10000
 
 local function setup_monitors(withNotif)
+  if os.getenv("HYPR_MONITOR_HOTPLUG") ~= "1" then
+    return
+  end
+
   local monitors = hl.get_monitors()
 
   local auxW = 0
