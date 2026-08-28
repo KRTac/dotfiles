@@ -86,6 +86,22 @@ select_provider() {
   printf "$_PROVIDER"
 }
 
+select_host_config() {
+  return $(
+    nix --extra-experimental-features "nix-command flakes" \
+      eval --json "$1#nixosConfigurations" \
+      --apply builtins.attrNames |
+      jq -r '.[]' |
+      fzf \
+        --height 50% \
+        --layout=reverse \
+        --border \
+        --delimiter=$'\t' \
+        --with-shell=bash \
+        --prompt='Available config hosts: '
+  )
+}
+
 gh_auth_or_die() {
   if ! gh auth status &>/dev/null; then
     echo "Not logged into GitHub CLI. Starting auth:"
@@ -115,21 +131,7 @@ format_and_install() {
 
     clear
     echo "Select host configuration:"
-
-    _NIXOS_HOST=$( \
-      nix --extra-experimental-features "nix-command flakes" \
-      eval --json "$_NIXOS_TARGET#nixosConfigurations" \
-      --apply builtins.attrNames |
-      jq -r '.[]' |
-      fzf \
-        --height 50% \
-        --layout=reverse \
-        --border \
-        --delimiter=$'\t' \
-        --with-shell=bash \
-        --prompt='Available config hosts: '
-    )
-
+    _NIXOS_HOST="$(select_host_config "$_NIXOS_TARGET")"
     _HOST_PATH="$_NIXOS_TARGET/hosts/$_NIXOS_HOST"
 
     if [[ -d "$_HOST_PATH" ]]; then
@@ -219,10 +221,17 @@ post_install() {
         && [[ -z $confirm || $confirm == [yY] || $confirm == [yY][eE][sS] ]];
       then
         mkdir -p "$_NEW_USER_HOME/.config/nos"
-        cp "$_PUBLIC_TARGET/.config/nos/config" "$_NEW_USER_HOME/.config/nos/config.local"
-        echo "Copied nos config to $_NEW_USER_HOME/.config/nos/config.local"
+        _LOCAL_CFG="$_NEW_USER_HOME/.config/nos/config.local"
+        cp "$_PUBLIC_TARGET/.config/nos/config" "$_LOCAL_CFG"
+        echo "Copied nos config to $_LOCAL_CFG"
 
-        source "$_NEW_USER_HOME/.config/nos/config.local"
+        if [[ -n "$_NIXOS_HOST" ]]; then
+          echo "Select host configuration:"
+          _NIXOS_HOST="$(select_host_config "$_NIXOS_TARGET")"
+        fi
+
+        sed -i "s/^NIXOS_BUILD_HOSTNAME=$/NIXOS_BUILD_HOSTNAME=$_NIXOS_HOST/" "$_LOCAL_CFG"
+        source "$_LOCAL_CFG"
         git -C "$_PUBLIC_TARGET" remote set-url origin "$PUBLIC_REPO"
 
         if [[ -n "$_PRIVATE_REPO" && -n "$PRIVATE_REPO" ]]; then
