@@ -153,23 +153,10 @@ format_and_install() {
       echo "Running nixos-install:"
       echo "sudo nixos-install --flake $_NIXOS_TARGET#$_NIXOS_HOST"
 
-      while true; do
-        sudo nixos-install --flake "$_NIXOS_TARGET#$_NIXOS_HOST"
-        status=$?
+      sudo nixos-install --flake "$_NIXOS_TARGET#$_NIXOS_HOST"
 
-        if $status; then
-          echo "Installation successful."
-          post_install
-          exit
-        fi
-
-        if ! yes_no "Installation failed. Retry it? (y/N): "; then
-          echo "Canceling installation."
-          exit 1
-        fi
-
-        echo "Retrying installation."
-      done
+      echo "Installation successful."
+      post_install
     else
       echo "Host '$_NIXOS_HOST' not found."
       echo "$_HOST_PATH doesn't exist"
