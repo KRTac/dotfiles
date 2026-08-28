@@ -157,7 +157,6 @@ format_and_install() {
 
       sudo nixos-install --flake "$_NIXOS_TARGET#$_NIXOS_HOST"
 
-      echo "Installation successful."
       post_install
     else
       echo "Host '$_NIXOS_HOST' not found."
