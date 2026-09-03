@@ -17,7 +17,7 @@ local function scale(value, startAt, endAt)
   return math.floor(scale * 100 + 0.5) / 100
 end
 
-local externalMonitor = "HDMI-A-5"
+local externalMonitor = ""
 local laptopMonitor = "eDP-1"
 local notificationDurationMs = 10000
 
@@ -35,7 +35,8 @@ local function setup_monitors(withNotif)
   local laptopH = 0
 
   for _, monitor in ipairs(monitors) do
-    if monitor.name == externalMonitor then
+    if monitor.name == "HDMI-A-5" or monitor.name == "DP-1" then
+      externalMonitor = monitor.name
       auxW = monitor.width
       auxH = monitor.height
       auxFreq = monitor.refresh_rate
